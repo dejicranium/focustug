@@ -119,7 +119,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 async function getLatestVersion() {
-    return await sendRequest("http:http://localhost:5000/api/v1/updates/version", "GET")
+    return await sendRequest("http:https://leapstartlabapi.herokuapp.com/api/v1/updates/version", "GET")
 }
 
 
@@ -1269,7 +1269,7 @@ function onTabActivated(tab) {
 
 
                     // send to server
-                    await sendRequest('http:http://localhost:5000/api/v1/sessions/register', "POST", {
+                    await sendRequest('http:https://leapstartlabapi.herokuapp.com/api/v1/sessions/register', "POST", {
                         summary: SESSION.summary,
                         id: SESSION.id,
                         created: TASKS[SESSION.id].created,
@@ -1490,7 +1490,7 @@ function onTabActivated(tab) {
                         query.description = description
                     }
 
-                    const result = await sendRequest('http://localhost:5000/api/v1/sessions/rel', "POST", query)
+                    const result = await sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/sessions/rel', "POST", query)
                     const relevance = result.data;
 
                     if (relevance && relevance <= 5) {

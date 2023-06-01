@@ -156,12 +156,13 @@ async function tabsHandler() {
     const task_tab = document.getElementById('task-tab');
     const stats_tab = document.getElementById('stats-tab');
     const recent_tasks_tab = document.getElementById('recent-tasks-tab');
-
+    const settings_tab = document.getElementById('settings-tab')
     // add the class
+    
     if (activeTab === "task") {
         task_tab.classList.add('tab-selected');
-        stats_tab.classList.remove('tabs-selected');
-        recent_tasks_tab.classList.remove('tabs-selected');
+        stats_tab.classList.remove('tab-selected');
+        recent_tasks_tab.classList.remove('tab-selected');
         
 
         // show the create div
@@ -169,10 +170,12 @@ async function tabsHandler() {
         document.getElementById('stats').style.display = 'none';
         document.getElementById('recent-tasks').style.display = 'none';
     }
+
+    /*
     else if (activeTab === 'stats') {
         task_tab.classList.remove('tab-selected');
-        stats_tab.classList.add('tabs-selected')
-        recent_tasks_tab.classList.remove('tabs-selected');
+        stats_tab.classList.add('tab-selected')
+        recent_tasks_tab.classList.remove('tab-selected');
 
         document.getElementsByClassName('create')[0].style.display = 'none';
         document.getElementById('stats').style.display = 'block';
@@ -180,17 +183,17 @@ async function tabsHandler() {
 
     }
     else if (activeTab === 'recent-tasks') {
+        recent_tasks_tab.classList.add('tab-selected');
         task_tab.classList.remove('tab-selected');
-        recent_tasks_tab.classList.add('tabs-selected');
 
-        stats_tab.classList.remove('tabs-selected')
+        stats_tab.classList.remove('tab-selected')
 
 
         document.getElementsByClassName('create')[0].style.display = 'none';
         document.getElementById('stats').style.display = 'none';
         document.getElementById('recent-tasks').style.display = 'block';
 
-    }
+    }*/
 
     for (tab of document.getElementsByClassName('landing-tab')) {
 
@@ -200,32 +203,79 @@ async function tabsHandler() {
             if (e.target.id === 'task-tab') {
                 task_tab.classList.add('tab-selected');
                 stats_tab.classList.remove('tab-selected');
-                recent_tasks_tab.classList.remove('tabs-selected');
+                recent_tasks_tab.classList.remove('tab-selected');
+                settings_tab.classList.remove('tab-selected')
 
 
                 document.getElementsByClassName('create')[0].style.display = 'block';
                 document.getElementById('stats').style.display = 'none';
                 document.getElementById('recent-tasks').style.display = 'none';
+                document.getElementById('settings').style.display = 'none';
             }
             else if (e.target.id === 'stats-tab') {
                 task_tab.classList.remove('tab-selected');
                 stats_tab.classList.add('tab-selected')
-                recent_tasks_tab.classList.remove('tabs-selected');
+                recent_tasks_tab.classList.remove('tab-selected');
+                settings_tab.classList.remove('tab-selected')
 
 
-                document.getElementsByClassName('create')[0].style.display = 'none';
+
+
+
+                const containers = document.getElementsByClassName('landing-container');
+                
+                for (element of containers) {
+                    element.style.display = 'none'
+
+
+                }
+
                 document.getElementById('stats').style.display = 'block';
-                document.getElementById('recent-tasks').style.display = 'none';
             }
             else if (e.target.id === 'recent-tasks-tab') {
                 task_tab.classList.remove('tab-selected');
                 stats_tab.classList.remove('tab-selected')
-                recent_tasks_tab.classList.add('tabs-selected');
+                recent_tasks_tab.classList.add('tab-selected');
+                settings_tab.classList.remove('tab-selected')
 
 
-                document.getElementsByClassName('create')[0].style.display = 'none';
-                document.getElementById('stats').style.display = 'none';
+                const containers = document.getElementsByClassName('landing-container');
+                
+                for (element of containers) {
+                    element.style.display = 'none'
+
+
+                }
+
+
+
                 document.getElementById('recent-tasks').style.display = 'block';
+               
+            }
+            else if(e.target.id === 'settings-tab') {
+                task_tab.classList.remove('tab-selected');
+                stats_tab.classList.remove('tab-selected')
+                recent_tasks_tab.classList.remove('tab-selected');
+                settings_tab.classList.add('tab-selected')
+
+                const containers = document.getElementsByClassName('landing-container');
+                
+                for (element of containers) {
+                    element.style.display = 'none'
+
+
+                }
+               
+
+
+                document.getElementById('settings').style.display = 'block';
+
+                /*
+                document.getElementsByClassName('create')[0].style.display = 'none';
+                document.getElementById('stats').style.display = 'block';
+                document.getElementById('recent-tasks').style.display = 'none';
+                document.getElementById('settings').style.display = 'block';*/
+
             }
         })
     }
@@ -249,7 +299,7 @@ async function createSessionHandler() {
 
     if (textarea) {
         textarea.addEventListener('keydown', function(e) {
-            const max = 60;
+            const max = 140;
             // value of textarea 
             let value = textarea.value;
             let left = max - value.length;
@@ -274,22 +324,25 @@ async function createSessionHandler() {
     let FLAG_BREAK_EXISTS = false;
 
     /* add break time button */
+
+    /*
     const add_break_el = document.getElementById('add-break');
     const break_el = document.getElementById('break-time')
     add_break_el.addEventListener('click', function () {
         add_break_el.style.visibility = 'hidden';
         break_el.style.display = 'block';
         FLAG_BREAK_EXISTS = true;
-    })
+    }) */
 
     
     /* delete break time button */
+    /*
     const delete_break_button = document.getElementById('delete-break');
     delete_break_button.addEventListener('click', function() {
         break_el.style.display = 'none';
         add_break_el.style.visibility = 'visible';
         FLAG_BREAK_EXISTS = false;
-    })
+    })&/
 
 
 
@@ -348,10 +401,11 @@ async function createSessionHandler() {
             
             
             
-           /* const result = await sendRequest("http://localhost:5000/api/v1/sessions/start", "POST", {task})
-            let summary = result.data */
+            const result = await sendRequest("https://leapstartlabapi.herokuapp.com/api/v1/sessions/start", "POST", {task})
+            let summary = result && result.data && result.data.data || task;
+            //alert(JSON.stringify(summary))
             //let  summary = 'something something'
-            let summary = task;
+            //let summary = task;
             GLOBALS.summary = summary;
             try {
                 summary = JSON.parse(summary)
@@ -374,7 +428,7 @@ async function createSessionHandler() {
 
                 let loadingContainer = document.getElementsByClassName('lds-container')[0];
 
-                await createSession(task, break_time, task)
+                await createSession(summary, break_time, summary)
                 loadingContainer.style.display = 'none';
 
 
@@ -722,10 +776,10 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
                         <p style="color: lightgrey">${task.summary}</p>
                         <div style="display: flex">
                             <div style="display:flex; align-items:center; margin-right: 16px; color: #4ECB71;">
-                                <svg style="margin-right: 8px" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!--- <svg style="margin-right: 8px" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 10C2.76 10 2.55 10.09 2.41 10.25C2.27 10.4 2.21 10.62 2.24 10.86L2.74 13.85C2.82 14.5 3.4 15 4 15H7C7.64 15 8.36 14.44 8.5 13.82L9.56 10.63C9.6 10.5 9.57 10.31 9.5 10.19C9.39 10.07 9.22 10 9 10H3ZM7 17H4C2.38 17 0.960002 15.74 0.760002 14.14L0.260002 11.15C0.150002 10.3 0.390002 9.5 0.910002 8.92C1.43 8.34 2.19 8 3 8H9C9.83 8 10.58 8.35 11.06 8.96C11.17 9.11 11.27 9.27 11.35 9.45C11.78 9.36 12.22 9.36 12.64 9.45C12.72 9.27 12.82 9.11 12.94 8.96C13.41 8.35 14.16 8 15 8H21C21.81 8 22.57 8.34 23.09 8.92C23.6 9.5 23.84 10.3 23.74 11.11L23.23 14.18C23.04 15.74 21.61 17 20 17H17C15.44 17 13.92 15.81 13.54 14.3L12.64 11.59C12.26 11.31 11.73 11.31 11.35 11.59L10.43 14.37C10.07 15.82 8.56 17 7 17ZM15 10C14.78 10 14.61 10.07 14.5 10.19C14.42 10.31 14.4 10.5 14.45 10.7L15.46 13.75C15.64 14.44 16.36 15 17 15H20C20.59 15 21.18 14.5 21.25 13.89L21.76 10.82C21.79 10.62 21.73 10.4 21.59 10.25C21.5154 10.1684 21.4241 10.1038 21.3223 10.0606C21.2205 10.0175 21.1105 9.9968 21 10H15Z" fill="#4ECB71"/>
-                                </svg>
-                                ${task.meta.TASK_TABS || 0}
+                                </svg>--->
+                                ${task.meta.TASK_TABS || 0} task tabs
 
                             </div>
 
@@ -796,21 +850,65 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
   });*/
 
 
+function showToast(type, text, position="top") {
+    const div = document.createElement('div');
+
+    if (type === 'success') {
+
+        div.style.background = 'green';
+    }else if (type === 'error') {
+        div.style.background = 'red'
+    }
+    div.style.height = '50px';
+    div.style.width = '100%';
+    div.style.textAlign = 'center';
+    div.style.color = 'white';
+    div.style.display = 'flex';
+    div.style.alignItems = 'center';
+    div.style.justifyContent = 'center';
+    div.style.fontWeight = '500'
+    div.attributes.id = new Date();
+    div.innerText = text;
+    
+    if (position === 'top') {
+
+        document.body.prepend(div)
+        document.body.scrollTo({top: 0, behavior: 'smooth'})
+    }
+    else {
+        document.body.append(div)
+        document.body.scrollTo({bottom: 0, behavior: 'smooth'})
+    }
+    
+    
+    setTimeout(() => {
+        div.remove()
+    }, 3000)
+}
+
 function setSettingsHandler() {
+
+    const add_lock_site_button = document.getElementById('add-lock-site-btn');
+    const hard_lock_content = document.getElementById('hard-lock-content');
+    const save_hard_lock_changes = document.getElementById('save-hard-lock-btn');
+
 
     const settings = {
         TONE: 'normal',
-        OPTIMAL_TABS: 5
+        OPTIMAL_TABS: 5,
+        LOCKED_SITES: [],
     }
 
+    /*
     ELEMENTS.SETTINGS_ICON.addEventListener('click', () => {
         ELEMENTS.SETTINGS_CONTAINER.style.display = 'block';
 
         ELEMENTS.CREATE_CONTAINER.style.display = 'none'
         ELEMENTS.TASK_CONTAINER.style.display = 'none'
-    })
+    })*/
 
     //settings back
+    /*
     ELEMENTS.SETTINGS_BACK.addEventListener('click', () => {
         if (activeSession) {
             ELEMENTS.SETTINGS_CONTAINER.style.display = 'none'
@@ -824,8 +922,137 @@ function setSettingsHandler() {
             ELEMENTS.TASK_CONTAINER.style.display = 'none';
         }
         
+    })*/
+
+
+    chrome.storage.sync.get(null, async (settings) => {
+        if (settings.LOCKED_SITES && settings.LOCKED_SITES.length > 0) {
+            // popultate
+
+            for (let i = 0; i < settings.LOCKED_SITES.length; i++) {
+                const index= i;
+                const locked_site = settings.LOCKED_SITES[i]
+
+
+                const new_lock_element = document.createElement('div');
+                new_lock_element.classList.add('lock-item');
+                new_lock_element.dataset.lockitem = index;
+                new_lock_element.innerHTML = `
+                <div style="width: 90%" data-lockitem='${index}'>
+                    <input class="lock-item-input" style="width:100%" type="text" placeholder="facebook.com" value="${locked_site}">
+                    </div>
+                    <div style="margin-left: 8px; width: 10%; display: flex; flex-direction: row; justify-content: flex-end; align-items: center;" >
+                        <img style="display:block" class="lock-item-cancel" data-lockitem='${index}' src="./images/cross_mark.png"/>
+
+                       
+        
+                    </div>
+                </div>`
+                hard_lock_content.appendChild(new_lock_element)
+            }
+            
+        }
+        else {
+            const new_lock_element = document.createElement('div');
+            new_lock_element.classList.add('lock-item');
+            new_lock_element.dataset.lockitem = '0'
+            new_lock_element.innerHTML = `
+            <div style="width: 90%">
+                <input class="lock-item-input" style="width:100%; margin-right: 8px;" type="text" placeholder="facebook.com">
+                </div>
+                <div  style="width: 10%; display: flex; margin-left: 8px; flex-direction: row; justify-content: flex-end; align-items: center;" >
+                    <img  style="display:block" class="lock-item-cancel" data-lockitem="0"  src="./images/cross_mark.png"/>
+                    
+    
+                </div>
+            </div>`
+            hard_lock_content.appendChild(new_lock_element) 
+        }
+
+
+
+
+
+        const hard_lock_cancel_items = document.getElementsByClassName('lock-item-cancel');
+
+        for (let cancel_item of hard_lock_cancel_items) {
+
+            //alert(JSON.stringify(cancel_item))
+            cancel_item.addEventListener('click', (e) => {
+
+                let element = e.target;
+                let index  = element?.dataset.lockitem;
+                while(!index) {
+                    element = e.parentNode;
+                    index = element.dataset.lockitem
+                    
+                }
+                
+            
+                //alert('somoething')
+    
+
+
+
+    
+                // get all lock-items;
+                const lock_items = document.getElementsByClassName('lock-item');
+    
+                for (let item of lock_items) {
+                    //item.dataset.lockitem)
+                    if (parseInt(item.dataset.lockitem) === parseInt(index)) {
+                        item.remove()
+                    }
+                }
+    
+    
+            })
+        }
+    
+    
     })
 
+    
+    save_hard_lock_changes.addEventListener('click', (e) => {
+        // scroll through the lock items and get values;
+
+        chrome.storage.sync.get(null, (settt) => {
+            const LOCKED_SITES = settt.LOCKED_SITES;
+
+            const lock_items = document.getElementsByClassName('lock-item-input');
+            let error = false
+            for (input of lock_items) {
+                if (input.value && input.value.indexOf(".") === -1) {
+                    // 
+                    showToast('error', "Please enter website")
+                    error = true;
+                }
+    
+                else if (LOCKED_SITES.indexOf(input.value)) {
+                    
+                }
+                else {
+    
+                    settings.LOCKED_SITES.push(input.value)
+                   
+                }
+                //alert(JSON.stringify(settings))
+            }
+    
+            if (!error) {
+                chrome.storage.sync.set(settings)
+    
+                showToast('success', 'Saved locked sites')
+            }
+        })
+
+
+        
+    })
+
+
+    
+    
     const tone_choices = document.getElementsByClassName('settings-character');
     //alert(JSON.stringify(tone_choices))
     for (let i = 0; i < tone_choices.length; i++) {
@@ -868,14 +1095,82 @@ function setSettingsHandler() {
                 
         })
     }
-    
-    
+
+
+
+    // hard lock
 
     
 
 
-    chrome.storage.sync.get(null , (e) => {
-    })
+    add_lock_site_button.addEventListener('click', function() {
+        // add a new lock-item
+
+        //alert('sers')
+
+        //alert('er')
+
+        save_hard_lock_changes.disabled = false;
+
+        
+        const lock_items_count = document.getElementsByClassName('lock-item')?.length || 0;
+        const new_lock_element = document.createElement('div');
+        new_lock_element.classList.add('lock-item');
+        new_lock_element.dataset.lockitem = lock_items_count + 1
+
+        new_lock_element.innerHTML = `
+        <div style="width: 90%">
+             <input class="lock-item-input" style="width:100%; margin-right: 8px;" type="text" placeholder="facebook.com">
+            </div>
+            <div  style="width: 10%; margin-left: 8px; display: flex; flex-direction: row; justify-content: flex-end; align-items: center;" >
+                <img  style="display:block" class="lock-item-cancel" data-lockitem="${lock_items_count + 1}" src="./images/cross_mark.png"/>
+                
+
+            </div>
+        </div>`
+
+        hard_lock_content.appendChild(new_lock_element)
+
+        const hard_lock_cancel_items = document.getElementsByClassName('lock-item-cancel');
+
+        for (let cancel_item of hard_lock_cancel_items) {
+
+            //alert(JSON.stringify(cancel_item))
+            cancel_item.addEventListener('click', (e) => {
+
+                let element = e.target;
+                let index  = element?.dataset.lockitem;
+                while(!index) {
+                    element = e.parentNode;
+                    index = element.dataset.lockitem
+                    
+                }
+                
+            
+                //alert('somoething')
+    
+
+
+
+    
+                // get all lock-items;
+                const lock_items = document.getElementsByClassName('lock-item');
+    
+                for (let item of lock_items) {
+                    //item.dataset.lockitem)
+                    if (parseInt(item.dataset.lockitem) === parseInt(index)) {
+                        item.remove()
+                    }
+                }
+    
+    
+            })
+        }
+        
+    });
+
+
+    // 
 
 
     // save settings
@@ -900,22 +1195,43 @@ function setSettingsHandler() {
             //console.log('saved')
         });
 
+
+        const lock_items = document.getElementsByClassName('lock-item-input');
+        for (input of lock_items) {
+            if (input.value) {
+
+                settings.LOCKED_SITES.push(input.value)
+            }
+            //alert(JSON.stringify(settings))
+        }
+        chrome.storage.sync.set(settings)
+
+
+
+
         chrome.runtime.sendMessage({message: 'find-active-session'}, (response) => {
 
-            ELEMENTS.SETTINGS_CONTAINER.style.display = 'none';
+            //ELEMENTS.SETTINGS_CONTAINER.style.display = 'none';
 
             if (response.id) {
 
                 ELEMENTS.TASK_CONTAINER.style.display = 'block'
             }
             else {
-                ELEMENTS.CREATE_CONTAINER.style.display = 'block';
+
+                showToast('success', "Settings saved")
+                /*ELEMENTS.CREATE_CONTAINER.style.display = 'block';
+                document.getElementById()
+                document.getElementsByClassName('create')[0].style.display = "block"*/
             }
         })
         
 
         
     })
+
+
+    
 }
 
 function getDistractionsCounter(){
@@ -981,7 +1297,7 @@ async function refreshUserPlanStatus(e) {
         const token = settings && settings.auth && settings.auth.USER_TOKEN
         try {
 
-            await sendRequest('http://localhost:5000/api/v1/users/plans', "GET", null, {"Authorization" : "Bearer " + token}).then(resp=> {
+            await sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/users/plans', "GET", null, {"Authorization" : "Bearer " + token}).then(resp=> {
                 if (resp && resp.data && resp.data.plan) {
                     // referesh plan
                     document.getElementById('create-container').style.display = 'block'
@@ -1021,7 +1337,7 @@ async function login(login_email, login_password, data={}) {
     const login_btn = document.getElementById('login-btn');
 
     
-    await  sendRequest('http://localhost:5000/api/v1/auth/login', "POST", {
+    await  sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/auth/login', "POST", {
             email: login_email,
             password:login_password
         }).then(resp=> {
@@ -1036,6 +1352,9 @@ async function login(login_email, login_password, data={}) {
              
                  ELEMENTS.CREATE_CONTAINER.style.display = 'block'
                  setUpHandlers()
+
+                 document.getElementById('tabs').style.display = 'flex'
+
             }
             else {
                 //alert(resp.ok)
@@ -1061,6 +1380,8 @@ async function login(login_email, login_password, data={}) {
 
 
 function setUpAuthHandler() {
+
+    document.getElementById('tabs').style.display = 'none';
     const onboarding = document.getElementById('onboarding');
     onboarding.style.display = 'block'
 
@@ -1090,9 +1411,10 @@ function setUpAuthHandler() {
         loading.style.display = 'flex';
         auth_container.style.display = 'none';
         ELEMENTS.AUTH_ERROR.style.display = 'none'
+
         
 
-        /*await  sendRequest('http://localhost:5000/api/v1/auth/login', "POST", {
+        /*await  sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/auth/login', "POST", {
             email: login_email,
             password:login_password
         }).then(resp=> {
@@ -1139,23 +1461,35 @@ function setUpAuthHandler() {
         // set button to disabled 
         register_btn.disabled = true;
 
-        sendRequest('http://localhost:5000/api/v1/auth/register', "POST", {
+        loading.style.display = 'flex';
+        auth_container.style.display = 'none';
+        ELEMENTS.AUTH_ERROR.style.display = 'none'
+
+
+        sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/auth/register', "POST", {
             email: register_email,
             password:register_password,
             name: register_name
         }).then(resp=> {
+            
             if (resp && resp.data) {
+
+                showToast('success', "Created account successfully")
 
                 login(register_email, register_password)
 
             }
             else { 
                 register_btn.disabled = false;
+                auth_container.style.display = 'block';
+
                 ELEMENTS.AUTH_ERROR.innerText  = "Error signing up"
                 ELEMENTS.AUTH_ERROR.style.display = 'block'
             }
         }).catch(err=> {
             console.log(e)
+        }).finally(() => {
+            loading.style.display = 'none';
         })
     })
 

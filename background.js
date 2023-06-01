@@ -233,7 +233,7 @@ async function activateDeletePastTasks() {
 }
 
 async function getLatestVersion() {
-    return await sendRequest("http://localhost:5000/api/v1/updates/version", "GET")
+    return await sendRequest("https://leapstartlabapi.herokuapp.com/api/v1/updates/version", "GET")
 }
 
 
@@ -669,7 +669,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         }, );
     } else if (message.message === 'close-tab') {
 
-        closeTab(message.data.tab_id, true)
+        closeTab(message.data.tab_id, 'distraction')
 
     } else if (message.message === 'get-distraction-counter') {} else if (message.message === 'search-closed-tabs') {
         const search_term = message.data.search_term;
@@ -997,8 +997,12 @@ async function calculateTabsRating(start_interval = true) {
                             const tabs_to_remove = tabs_array.slice(0, difference);
                             
                             tabs_to_remove.forEach(item=> {
+
+                                if (!item.classification) {
+                                    item.classification = 'misc'
+                                }
                                
-                                closeTab(item.tab_id, item.classification === 'distraction')
+                                closeTab(item.tab_id, item.classification)
                             })
 
                         }
@@ -1215,6 +1219,42 @@ function showDistractionWatch(timer, tab_id) {
 }
 
 
+function showLocked() {
+    const modal_div = document.createElement('div');
+    modal_div.style.height = '100%';
+    modal_div.style.width = '100%';
+    modal_div.style.position = 'fixed';
+    modal_div.style['zIndex'] = 10000000000000000;
+    modal_div.innerHTML = `
+        <div class="hardlock-modal" style="background-color:#222436; position: fixed; top: 0; left: 0; height: 100%; width:100% ">
+            <div class="hardlock-modal__container" style="height: 50vh !important;  margin: auto !important;">
+                <div class="logo" style="width: 50% !important; margin: auto !important; display: flex !important; align-items: center; text-align: center; margin: 120px auto !important; justify-content: center;">
+                    <svg style="margin-right: 8px !important;" width="20" height="20" viewBox="0 0 49 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 10C0 4.47715 4.47715 0 10 0H37.9677C43.4905 0 47.9677 4.47715 47.9677 10V38C47.9677 43.5229 43.4905 48 37.9677 48H23.9838H10C4.47716 48 0 43.5229 0 38V10Z" fill="#4ECB71"/>
+                        <path d="M32.6928 34.5024C35.1528 37.3011 37.4444 39.6939 38.2807 34.9291C39.117 30.1643 37.7289 29.0158 34.3481 26.2936C33.187 25.3586 32.0116 24.7532 30.9687 24.3613C28.7563 23.53 27.5428 25.2327 28.6962 27.7765C29.7827 30.1728 31.3655 32.9923 32.6928 34.5024Z" fill="white"/>
+                        <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M24.8784 35.8346C23.2667 38.6333 21.7653 41.026 21.2174 36.2612C20.6695 31.4965 21.5789 30.348 23.7939 27.6257C24.4684 26.7967 25.1502 26.2268 25.7724 25.8351C27.3952 24.8135 28.2536 26.6265 27.3995 29.4323C26.6926 31.7543 25.7091 34.392 24.8784 35.8346Z" fill="white"/>
+                        <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M19.7549 22.8415L0.0352374 24.2667L0.0351562 26.5455L21.9304 25.0184L19.7549 22.8415ZM21.1609 22.7399L23.3396 24.9201L48.0022 23.2V20.8L21.1609 22.7399Z" fill="white"/>
+                        <path d="M28.839 20.1841C29.726 19.6908 30.7126 20.0934 31.0425 21.0832Lnan nanL31.0425 21.0832C31.3724 22.0731 30.9207 23.2754 30.0337 23.7687L26.967 25.4741C26.08 25.9674 25.0935 25.5648 24.7636 24.575Lnan nanL24.7636 24.575C24.4337 23.5851 24.8853 22.3828 25.7724 21.8895L28.839 20.1841Z" fill="white"/>
+                    </svg>
+                    <p style="color: white !important; font-size: 20px !important; font-family: 'Inter', sans-serif !important;">FocusTug</p>
+                </div>
+                <div class="hardlock-modal-message">
+                    <h1 style="color: white !important; text-align:center; font-size: 20px !important; font-weight: 400; line-height: 1.5 !important; font-family: 'Inter', sans-serif !important;  margin: auto;">You've locked this site permanently during your work session.</h1>
+                    <p style="color: white !important; font-family: 'Inter', sans-serif !important; font-size: 16px; font-weight: 400; text-align: center;">Complete your task and turn off FocusTug to access this site.</p>
+                </div>
+            </div>
+
+        </div>
+    `
+
+    document.body.prepend(modal_div)
+    
+}
+
 
 function showBlocker(host, tab) {
 
@@ -1248,64 +1288,55 @@ function showBlocker(host, tab) {
         }
     
         modal_div.innerHTML += `
-        <div class="blocker-modal-container">
-            <div class="blocker-modal-logo" style="display: flex !important; align-items: center; !important">
-                <svg width="20" height="20" viewBox="0 0 49 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 10C0 4.47715 4.47715 0 10 0H37.9677C43.4905 0 47.9677 4.47715 47.9677 10V38C47.9677 43.5229 43.4905 48 37.9677 48H23.9838H10C4.47716 48 0 43.5229 0 38V10Z" fill="#4ECB71"/>
-                    <path d="M32.6928 34.5024C35.1528 37.3011 37.4444 39.6939 38.2807 34.9291C39.117 30.1643 37.7289 29.0158 34.3481 26.2936C33.187 25.3586 32.0116 24.7532 30.9687 24.3613C28.7563 23.53 27.5428 25.2327 28.6962 27.7765C29.7827 30.1728 31.3655 32.9923 32.6928 34.5024Z" fill="white"/>
-                    <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M24.8784 35.8346C23.2667 38.6333 21.7653 41.026 21.2174 36.2612C20.6695 31.4965 21.5789 30.348 23.7939 27.6257C24.4684 26.7967 25.1502 26.2268 25.7724 25.8351C27.3952 24.8135 28.2536 26.6265 27.3995 29.4323C26.6926 31.7543 25.7091 34.392 24.8784 35.8346Z" fill="white"/>
-                    <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M19.7549 22.8415L0.0352374 24.2667L0.0351562 26.5455L21.9304 25.0184L19.7549 22.8415ZM21.1609 22.7399L23.3396 24.9201L48.0022 23.2V20.8L21.1609 22.7399Z" fill="white"/>
-                    <path d="M28.839 20.1841C29.726 19.6908 30.7126 20.0934 31.0425 21.0832Lnan nanL31.0425 21.0832C31.3724 22.0731 30.9207 23.2754 30.0337 23.7687L26.967 25.4741C26.08 25.9674 25.0935 25.5648 24.7636 24.575Lnan nanL24.7636 24.575C24.4337 23.5851 24.8853 22.3828 25.7724 21.8895L28.839 20.1841Z" fill="white"/>
+        <div class="blocker-modal" style="background-color:#222436; position: fixed; top: 0; left: 0; height: 100%; width:100% ">
+            <div class="hardlock-modal__container" style="height: 50vh !important;  margin: auto !important;">
+                <div class="logo" style="width: 50% !important; margin: auto !important; display: flex !important; align-items: center !important; text-align: center; margin: 120px auto !important; justify-content: center !important;">
+                    <svg style="margin-right: 8px !important;" width="20" height="20" viewBox="0 0 49 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 10C0 4.47715 4.47715 0 10 0H37.9677C43.4905 0 47.9677 4.47715 47.9677 10V38C47.9677 43.5229 43.4905 48 37.9677 48H23.9838H10C4.47716 48 0 43.5229 0 38V10Z" fill="#4ECB71"/>
+                        <path d="M32.6928 34.5024C35.1528 37.3011 37.4444 39.6939 38.2807 34.9291C39.117 30.1643 37.7289 29.0158 34.3481 26.2936C33.187 25.3586 32.0116 24.7532 30.9687 24.3613C28.7563 23.53 27.5428 25.2327 28.6962 27.7765C29.7827 30.1728 31.3655 32.9923 32.6928 34.5024Z" fill="white"/>
+                        <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M34.7537 32.1024C32.6837 25.6766 30.3841 26.4721 29.2701 24.5241" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M24.8784 35.8346C23.2667 38.6333 21.7653 41.026 21.2174 36.2612C20.6695 31.4965 21.5789 30.348 23.7939 27.6257C24.4684 26.7967 25.1502 26.2268 25.7724 25.8351C27.3952 24.8135 28.2536 26.6265 27.3995 29.4323C26.6926 31.7543 25.7091 34.392 24.8784 35.8346Z" fill="white"/>
+                        <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M23.5325 33.4347C24.8887 27.0088 26.3954 27.8044 27.1252 25.8564" stroke="#F4F4F4" stroke-width="1.5" stroke-linecap="round"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M19.7549 22.8415L0.0352374 24.2667L0.0351562 26.5455L21.9304 25.0184L19.7549 22.8415ZM21.1609 22.7399L23.3396 24.9201L48.0022 23.2V20.8L21.1609 22.7399Z" fill="white"/>
+                        <path d="M28.839 20.1841C29.726 19.6908 30.7126 20.0934 31.0425 21.0832Lnan nanL31.0425 21.0832C31.3724 22.0731 30.9207 23.2754 30.0337 23.7687L26.967 25.4741C26.08 25.9674 25.0935 25.5648 24.7636 24.575Lnan nanL24.7636 24.575C24.4337 23.5851 24.8853 22.3828 25.7724 21.8895L28.839 20.1841Z" fill="white"/>
                     </svg>
-    
-                    <p style="margin-left: 8px; color: white; font-size: 20px;">FocusTug</p>
+                    <p style="color: white !important; font-size: 20px !important; font-family: 'Inter', sans-serif !important;">FocusTug</p>
+                </div>
+                <div class="hardlock-modal-message">
+                    <h1 style="color: white !important; text-align:center; font-size: 20px !important; font-weight: 400; line-height: 1.5 !important; font-family: 'Inter', sans-serif !important;  margin: auto;">${message}</h1>
+                </div>
+
+                <div class="focustug__bottom" style="width: 80%; margin:auto; margin-top: 120px; display: flex; justify-content: center">
+                    <button id="blocker-close-cta" style="color: #4ECB71; font-size: 18px; margin-right: 16px; background-color: transparent; border: none; display: flex; align-items: center;">
+                        <svg style="margin-right: 8px;" width="18" height="18" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M33.8338 25.6606L49.2525 10.2419C50.8374 8.65704 50.8374 6.0875 49.2525 4.50261L46.5992 1.84931C45.0143 0.264424 42.4448 0.264424 40.8599 1.84931L25.4412 17.268L10.0224 1.84931C8.43756 0.264424 5.86801 0.264424 4.28313 1.84931L1.62982 4.50261C0.0449416 6.0875 0.0449416 8.65704 1.62982 10.2419L17.0485 25.6606L1.62982 41.0794C0.0449416 42.6642 0.0449416 45.2338 1.62982 46.8187L4.28313 49.472C5.86801 51.0569 8.43756 51.0569 10.0224 49.472L25.4412 34.0533L40.8599 49.472C42.4448 51.0569 45.0143 51.0569 46.5992 49.472L49.2525 46.8187C50.8374 45.2338 50.8374 42.6642 49.2525 41.0794L33.8338 25.6606Z" fill="#4ECB71"/>
+                        </svg>
+                            
+                        Close tab
+                    </button>
+                    <button id="ignore-once"  style="color: red; font-size: 18px; margin-right: 16px; background-color: transparent; border: none; display: flex; align-items: center;">
+                        <svg style="margin-right: 8px;" width="18" height="18" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M33.8338 25.6606L49.2525 10.2419C50.8374 8.65704 50.8374 6.0875 49.2525 4.50261L46.5992 1.84931C45.0143 0.264424 42.4448 0.264424 40.8599 1.84931L25.4412 17.268L10.0224 1.84931C8.43756 0.264424 5.86801 0.264424 4.28313 1.84931L1.62982 4.50261C0.0449416 6.0875 0.0449416 8.65704 1.62982 10.2419L17.0485 25.6606L1.62982 41.0794C0.0449416 42.6642 0.0449416 45.2338 1.62982 46.8187L4.28313 49.472C5.86801 51.0569 8.43756 51.0569 10.0224 49.472L25.4412 34.0533L40.8599 49.472C42.4448 51.0569 45.0143 51.0569 46.5992 49.472L49.2525 46.8187C50.8374 45.2338 50.8374 42.6642 49.2525 41.0794L33.8338 25.6606Z" fill="red"/>
+                        </svg>
+                            
+                        Ignore once
+                    </button>
+                    <button id="whitelist" style="color: white; font-size: 18px; margin-right: 16px; background-color: transparent; border: none; display: flex; align-items: center;">
+                        <svg style="margin-right: 8px;" width="18" height="18" viewBox="0 0 134 99" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M46.8944 75.8647L122.302 0.457031L133.776 11.9309L46.8944 98.8124L0.585205 52.5031L12.059 41.0293L46.8944 75.8647Z" fill="white"/>
+                        </svg>
+                            
+                            
+                        Whitelist
+                    </button>
                     
-            </div>
-    
-            <div>
-    
-                <div  class="blocker-header-message" style="color: white !important">
-                    ${message}
-    
                 </div>
-    
-                <div id="blocker-close-message" class="blocker-closer-message" style="margin-bottom: 24px; color: white !important">
-                    Closing in 5 seconds...
-                </div>
-    
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 64px; width: 60%; margin: auto; margin-top: 16px;;">
-                
-                
-                <div style="display: flex; margin-top: 36px; flex-direction: column">
-                        <button id="blocker-close-cta" style="
-                            padding: 16px;
-                            border-radius: 5px;
-                            min-width: 300px;  font-size: 16px !important; margin-bottom: 24px;  
-                            border: 2px solid #4ECB71; color: black !important; 
-                            background-color: #4ECB71 !important" class="blocker-close-cta"> Close now</button>
-                        <button id="ignore-once" style="  min-width: 300px; font-size: 16px !important;margin-bottom: 24px;
-                            padding: 16px;
-                            border-radius: 5px;
-                            border: 2px solid #A90F3D; color: white;  background: #A90F3D !important" class="blocker-close-cta">Ignore once</button>
-                        <button id="whitelist" style=" 
-                            padding: 16px;
-                            border-radius: 5px;
-                            min-width: 300px; font-size: 16px !important; background: lightgrey !important; margin-bottom: 24px; border: 2px solid lightgrey; color: black" class="blocker-close-cta"> Whitelist ${host} for this session</button>
-                    </div>
-                </div>
-    
             </div>
-    
-    
-    
-            <div class="blocker-bottom"> 
-                    <!--<button>Ignore once</button>--->
-            </div>
-        </div>`
+
+        </div>
+        `
         // set timer for seconds
         let initial_seconds = 5;
         let interval = null;
@@ -1631,9 +1662,7 @@ function computeTimeDecay(tab) {
         
         
         const tab_details = chrome.tabs.get(parseInt(tab.tabId), (focused_tab) => {
-            console.log("*****")
-         
-            console.log(focused_tab)
+           
             onTabActivated(focused_tab)
             const relevance = computePageRelevance(tab);
     
@@ -1821,7 +1850,7 @@ function computeTimeDecay(tab) {
 
 
                     // send to server
-                    await sendRequest('http:http://localhost:5000/api/v1/sessions/register', "POST", {
+                    await sendRequest('http:https://leapstartlabapi.herokuapp.com/api/v1/sessions/register', "POST", {
                         summary: SESSION.summary,
                         id: SESSION.id,
                         created: TASKS[SESSION.id].created,
@@ -1915,234 +1944,275 @@ function computeTimeDecay(tab) {
 
 
     async function computePageRelevance(tab, description = null) {
-        const tabId = tab.id;
-        let is_distraction = null;
-
 
         if (TASKS[SESSION.id] && !BREAK_TIME_ONGOING) {
-            if (tab.url) {
-                let host = new URL(tab.url).hostname;
-                let splitt = host.split('www.');
-                if (splitt && splitt.length > 1) {
-                    host = splitt[1]
-                }
 
-                if (!TASKS[SESSION.id].visited_hosts[host]) TASKS[SESSION.id].visited_hosts[host] = {
-                    verdict: "",
-                    relevance: null
-                }
-                else if (TASKS[SESSION.id].visited_hosts[host].verdict === 'distraction') {
-                    //is_distraction = true;
-
-
-                    increaseDayStats('distractions_detected', 1)
-
-                    chrome.scripting
-                        .executeScript({
-                            target: {
-                                tabId: tab.id
-                            },
-                            //files : [ "blocker.js"],
-                            func: showBlocker,
-                            args: [host, tabId]
-
-                        })
-                        .then((e) => {
-
-                        }).catch(e => {
-
-                        });
-
-                    const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
-                    if (focused_tab) {
-                        focused_tab.classification = 'distraction'
-                    }
-
-                    is_distraction = true;
-
-                    //initializeTotalDistractionTimeCounter(tab.id)
-
-                    return false;
-                } else if (TASKS[SESSION.id].visited_hosts[host].verdict === 'whitelisted') {
-
-                    // do nothing
-                    return
-                } else if (Object.keys(TASKS[SESSION.id].visited_hosts).find(item => item.indexOf(host) > -1)) {
-                    let corresponding_host = Object.keys(TASKS[SESSION.id].visited_hosts).find(item => item.indexOf(host) > -1)
-                    corresponding_host = TASKS[SESSION.id].visited_hosts[host];
-
-                    if (corresponding_host.verdict === 'whitelisted') {
-                        return;
-                    }
-                } else {
-                    const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
-                    if (focused_tab)
-                        focused_tab.classification = 'task';
-
-                }
-
-
-
-                if (!TASKS[SESSION.id].visited_urls[tab.url]) TASKS[SESSION.id].visited_urls[tab.url] = {
-                    verdict: "",
-                    relevance: null
-                }
-                else if (TASKS[SESSION.id].visited_urls[tab.url].verdict === 'distraction') {
-                    increaseDayStats('distractions_detected', 1)
-
-                    chrome.scripting
-                        .executeScript({
-                            target: {
-                                tabId: tab.id
-                            },
-                            //files : [ "blocker.js"],
-                            func: showBlocker,
-                            args: [host, tabId]
-
-                        })
-                        .then((e) => {
-
-                        }).catch(e => {
-
-                        })
-
-                    focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
-                    if (focused_tab) focused_tab.classification = 'distraction'
-                    is_distraction = true;
-
-                    //initializeTotalDistractionTimeCounter(tab.id)
-
-
-                    return false
-                } else if (TASKS[SESSION.id].visited_urls[tab.url].verdict === 'ignore-once') {
-                    increaseDayStats('distractions_detected', 1)
-
-                    chrome.scripting
-                        .executeScript({
-                            target: {
-                                tabId: tab.id
-                            },
-                            //files : [ "blocker.js"],
-                            func: showBlocker,
-                            args: [host, tabId]
-
-                        })
-                        .then((e) => {
-
-                        }).catch(e => {
-
-                        })
-                    return false;
-                } else {
-                    const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
-                    if (focused_tab) focused_tab.classification = 'task'
-
-                }
-
-                // rate relevance
+            const tabId = tab.id;
+            let is_distraction = null;
+    
+            // see if it's  a locked site 
+    
+            chrome.storage.sync.get(null, async (settings) => {
                 try {
-                    const query = {
-                        summary: TASKS[SESSION.id].summary,
-                        title: tab.title,
-                        
+                    // see if something is part of the locked sites
+                    let host = new URL(tab.url).hostname;
+                    if (settings.LOCKED_SITES && settings.LOCKED_SITES.length > 0) {
+                        for (site of settings.LOCKED_SITES) {
+                            if (host.indexOf(site) > -1) {
+                                chrome.scripting
+                                    .executeScript({
+                                        target: {
+                                            tabId: tab.id
+                                        },
+                                        //files : [ "blocker.js"],
+                                        func: showLocked,
+                                        //args: [host, tabId]
+            
+                                    })
+                                    .then((e) => {
+            
+                                    }).catch(e => {
+            
+                                    });
+                                console.log("found locked _site " + host)
+                                return false
+                            }
+                        }
                     }
+                }catch(e) {
+    
+                }
+                
+                if (TASKS[SESSION.id] && !BREAK_TIME_ONGOING) {
                     if (tab.url) {
-                        try {
-                            query.host = new URL(tab.url).hostname
-                        }catch(e) {
-
+                        let host = new URL(tab.url).hostname;
+                        let splitt = host.split('www.');
+                        if (splitt && splitt.length > 1) {
+                            host = splitt[1]
                         }
-                    }
-                    if (description) {
-                        query.description = description
-                    }
-
-                    const result = await sendRequest('http://localhost:5000/api/v1/sessions/rel', "POST", query, {
-                        "Authorization": "Bearer " + USER_TOKEN
-                    }).then(resp=>{
-                        if (resp && resp.data && resp.status === false && resp.data.indexOf('renewed') > -1) {
-                            PLAN_EXPIRED = true
-                            chrome.action.setBadgeText({text: "E"})
-                            chrome.action.setBadgeBackgroundColor({color: "red"})
-                            chrome.runtime.sendMessage({message: 'plan-expired'});
+        
+                        if (!TASKS[SESSION.id].visited_hosts[host]) TASKS[SESSION.id].visited_hosts[host] = {
+                            verdict: "",
+                            relevance: null
                         }
-
-
-                        const relevance = resp.data && parseInt(resp.data);
-    
-                        if (relevance && relevance ==5 ) {
-                            chrome.scripting
-                            .executeScript({
-                                target: {
-                                    tabId: tab.id
-                                },
-                                //files : [ "blocker.js"],
-                                func: showMaybeBlocker,
-                                args: [host, tabId, SESSION]
-    
-                            })
-                            .then((e) => {
-    
-                            }).catch(e => {
-    
-                            })
-                        }
-    
-                        else if (relevance && relevance < 5) {
-                            TASKS[SESSION.id].visited_urls[tab.url].verdict = 'distraction';
-                            TASKS[SESSION.id].visited_urls[tab.url].relevance = relevance
-                            
+                        else if (TASKS[SESSION.id].visited_hosts[host].verdict === 'distraction') {
+                            //is_distraction = true;
+        
+        
                             increaseDayStats('distractions_detected', 1)
-    
-    
-                           
-    
-                            const focused_tab = TASKS[SESSION.id].tabs.find(t => parseInt(t.id) === tab.id);
-                            if (focused_tab) focused_tab.classification = 'distraction'
-    
-                            is_distraction = true;
+        
                             chrome.scripting
-                            .executeScript({
-                                target: {
-                                    tabId: tab.id
-                                },
-                                //files : [ "blocker.js"],
-                                func: showBlocker,
-                                args: [host, tabId, SESSION]
-    
-                            })
-                            .then((e) => {
-    
-                            }).catch(e => {
-    
-                            })
-    
-    
+                                .executeScript({
+                                    target: {
+                                        tabId: tab.id
+                                    },
+                                    //files : [ "blocker.js"],
+                                    func: showBlocker,
+                                    args: [host, tabId]
+        
+                                })
+                                .then((e) => {
+        
+                                }).catch(e => {
+        
+                                });
+        
+                            const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
+                            if (focused_tab) {
+                                focused_tab.classification = 'distraction'
+                            }
+        
+                            is_distraction = true;
+        
+                            //initializeTotalDistractionTimeCounter(tab.id)
+        
+                            return false;
+                        } else if (TASKS[SESSION.id].visited_hosts[host].verdict === 'whitelisted') {
+        
+                            // do nothing
+                            return
+                        } else if (Object.keys(TASKS[SESSION.id].visited_hosts).find(item => item.indexOf(host) > -1)) {
+                            let corresponding_host = Object.keys(TASKS[SESSION.id].visited_hosts).find(item => item.indexOf(host) > -1)
+                            corresponding_host = TASKS[SESSION.id].visited_hosts[host];
+        
+                            if (corresponding_host.verdict === 'whitelisted') {
+                                return;
+                            }
+                        } else {
+                            const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
+                            if (focused_tab)
+                                focused_tab.classification = 'task';
+        
+                        }
+        
+        
+        
+                        if (!TASKS[SESSION.id].visited_urls[tab.url]) TASKS[SESSION.id].visited_urls[tab.url] = {
+                            verdict: "",
+                            relevance: null
+                        }
+                        else if (TASKS[SESSION.id].visited_urls[tab.url].verdict === 'distraction') {
+                            increaseDayStats('distractions_detected', 1)
+        
+                            chrome.scripting
+                                .executeScript({
+                                    target: {
+                                        tabId: tab.id
+                                    },
+                                    //files : [ "blocker.js"],
+                                    func: showBlocker,
+                                    args: [host, tabId]
+        
+                                })
+                                .then((e) => {
+        
+                                }).catch(e => {
+        
+                                })
+        
+                            focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
+                            if (focused_tab) focused_tab.classification = 'distraction'
+                            is_distraction = true;
+        
+                            //initializeTotalDistractionTimeCounter(tab.id)
+        
+        
+                            return false
+                        } else if (TASKS[SESSION.id].visited_urls[tab.url].verdict === 'ignore-once') {
+                            increaseDayStats('distractions_detected', 1)
+        
+                            chrome.scripting
+                                .executeScript({
+                                    target: {
+                                        tabId: tab.id
+                                    },
+                                    //files : [ "blocker.js"],
+                                    func: showBlocker,
+                                    args: [host, tabId]
+        
+                                })
+                                .then((e) => {
+        
+                                }).catch(e => {
+        
+                                })
                             return false;
                         } else {
-                            // set to task 
-                            TASKS[SESSION.id].visited_urls[tab.url].verdict = 'task';
-                            TASKS[SESSION.id].visited_urls[tab.url].relevance = relevance
-    
-                            const focused_tab = TASKS[SESSION.id].tabs.find(t => t.id === tab.id);
+                            const focused_tab = TASKS[SESSION.id].tabs.find(ta => parseInt(ta.id) === tab.id);
                             if (focused_tab) focused_tab.classification = 'task'
-    
-    
-    
+        
                         }
-                    })
-                    
-
-
-                    // if the function hasn't returned yet here, then it means that the tab in focus is not a distraction
-                    // thus, clear the interval
-
-                } catch (e) {
-                    throw e
+        
+                        // rate relevance
+                        try {
+                            const query = {
+                                summary: TASKS[SESSION.id].summary,
+                                title: tab.title,
+                                
+                            }
+                            if (tab.url) {
+                                try {
+                                    query.host = new URL(tab.url).hostname
+                                }catch(e) {
+        
+                                }
+                            }
+                            if (description) {
+                                query.description = description
+                            }
+        
+                            const result = await sendRequest('https://leapstartlabapi.herokuapp.com/api/v1/sessions/rel', "POST", query, {
+                                "Authorization": "Bearer " + USER_TOKEN
+                            }).then(resp=>{
+                                if (resp && resp.data && resp.status === false && resp.data.indexOf('renewed') > -1) {
+                                    PLAN_EXPIRED = true
+                                    chrome.action.setBadgeText({text: "E"})
+                                    chrome.action.setBadgeBackgroundColor({color: "red"})
+                                    chrome.runtime.sendMessage({message: 'plan-expired'});
+                                }
+        
+        
+                                const relevance = resp.data && parseInt(resp.data);
+                                console.log('relevance')
+                                console.log(relevance)
+            
+                                if (relevance && parseInt(relevance) === 5 ) {
+                                    chrome.scripting
+                                    .executeScript({
+                                        target: {
+                                            tabId: tab.id
+                                        },
+                                        //files : [ "blocker.js"],
+                                        func: showMaybeBlocker,
+                                        args: [host, tabId, SESSION]
+            
+                                    })
+                                    .then((e) => {
+            
+                                    }).catch(e => {
+            
+                                    })
+                                }
+            
+                                else if (relevance && parseInt(relevance) < 5) {
+                                    TASKS[SESSION.id].visited_urls[tab.url].verdict = 'distraction';
+                                    TASKS[SESSION.id].visited_urls[tab.url].relevance = relevance
+                                    
+                                    increaseDayStats('distractions_detected', 1)
+            
+            
+                                   
+            
+                                    const focused_tab = TASKS[SESSION.id].tabs.find(t => parseInt(t.id) === tab.id);
+                                    if (focused_tab) focused_tab.classification = 'distraction'
+            
+                                    is_distraction = true;
+                                    chrome.scripting
+                                    .executeScript({
+                                        target: {
+                                            tabId: tab.id
+                                        },
+                                        //files : [ "blocker.js"],
+                                        func: showBlocker,
+                                        args: [host, tabId]
+            
+                                    })
+                                    .then((e) => {
+            
+                                    }).catch(e => {
+            
+                                    })
+            
+            
+                                    return false;
+                                } else {
+                                    // set to task 
+                                    TASKS[SESSION.id].visited_urls[tab.url].verdict = 'task';
+                                    TASKS[SESSION.id].visited_urls[tab.url].relevance = relevance
+            
+                                    const focused_tab = TASKS[SESSION.id].tabs.find(t => t.id === tab.id);
+                                    if (focused_tab) focused_tab.classification = 'task'
+            
+            
+            
+                                }
+                            })
+                            
+        
+        
+                            // if the function hasn't returned yet here, then it means that the tab in focus is not a distraction
+                            // thus, clear the interval
+        
+                        } catch (e) {
+                            throw e
+                        }
+        
+                    }
                 }
-
-            }
+            })
         }
+
+
     }
 
     chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -2174,10 +2244,10 @@ function computeTimeDecay(tab) {
 
 
 
-    async function closeTab(tab, distraction = false) {
+    async function closeTab(tab, type = null,) {
         try {
 
-            if (distraction) {
+            if (type === 'distraction') {
                 DISTRACTIONS_COUNTER++
                 increaseDayStats('distractions_closed', 1)
             }
@@ -2193,9 +2263,9 @@ function computeTimeDecay(tab) {
                 if (TASKS[SESSION.id]) {
 
                     chrome.tabs.get(parseInt(tab_id), (t) => {
-                        if (distraction) {
+                        if (type === 'distraction') {
                             DISTRACTIONS_CLOSED++
-                        } else {
+                        } else if (type === 'task') {
                             TASKS_CLOSED++
                         }
 
